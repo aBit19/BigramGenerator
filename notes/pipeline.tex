@@ -1,0 +1,21 @@
+\documentclass{article}
+\usepackage[english]{babel}
+\usepackage[utf8]{inputenc}
+\title{Notes for creating bigrams}
+\begin{document}
+\section*{Pipeline}
+Here is described the pipeline used for transforming
+the articles taken from wikipedia to nltk.Text objects to 
+bigrams (using all the convenient methods from nltk library).
+For each entry \textit{e} returned from wikipedia api the pipeline steps are:
+\begin{enumerate}
+    \item{entry $=$ get\_contents\_for(e)}
+    \item{entry $=$ [w['extract'] for w in entry]}
+    \item{entry $=$ reduce(lambda l1, l2: l1 + l2, entry)}
+    \item{entry $=$ entry.encode('ascii', 'ignore')}
+    \item{entry $=$ entry.strip()}
+    \item{tokens $=$ nltk.wordpunct\_tokenize(entry)}
+    \item{bigrams $=$ nltk.bigrams(tokens)}
+    \item{article $=$ nltk.Text(tokens)} 
+\end{enumerate}
+\end{document}
