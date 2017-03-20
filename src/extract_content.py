@@ -1,6 +1,40 @@
 import requests, nltk
 
-def get_bigrams_and_vocabulary(_file):
+#TODO: Create appropriate input files for HMM,
+#using transition prob and vocabulary.
+def generate_transition_prob_from(_file):
+    """The _file contains set of wikipedia articles which the transition
+    probabilities is to be derived from.
+    Returns a map having bigram (word1, word2) as key and as value the
+    transition probability from word1 to word2."""
+    bigrams, vocabulary = _get_bigrams_and_vocabulary(_file)
+    source_dict = _calculate_sources_distribution_from(bigrams)
+    transition_prob = _calculate_transition_prob_from(bigrams, source_dict)
+    return transition_prob
+    
+
+def _calculate_sources_distribution_from(bigrams):
+    tmp = {}
+    for bigram in bigrams:
+        source = bigram[0]
+        if (tmp.has_key(source)):
+            tmp[source] = tmp[source] + 1
+        else:
+            tmp[source] = 1
+
+    return tmp
+
+def _calculate_transition_prob_from(bigrams, source_dict):
+    tuple_dict = nltk.FreqDist(bigrams)
+    transition_prob = {} 
+    for bigram in bigrams:
+        prob = float(tuple_dict[bigram])/source_dict[bigram[0]]
+        transition_prob[bigram] = prob 
+    
+    return transition_prob 
+
+
+def _get_bigrams_and_vocabulary(_file):
     titles = _read_titles_from(_file)
     return _get_bigrams_and_vocabulary_forall(titles)
 
@@ -23,6 +57,8 @@ def _preprocess(x):
 
 def _get_bigrams_and_vocabulary_forall(articles):
     sample =  [_get_bigrams_and_vocabulary_for(article) for article in articles]
+    if len(sample) == 0:
+        raise ValueError("The articles are empty")
     return reduce(lambda t1, t2: (t1[0] + t2[0], t1[1] | t2[1]), sample)
 
 def _get_bigrams_and_vocabulary_for(article):
@@ -53,3 +89,6 @@ def _get_content_for(x):
     ).json()
     return (iter(response['query']['pages'].values()))
 
+def _print(x):
+        for key in x:
+            print "from {} to {} with likelihood {}".format(key[0], key[1], x[key])
