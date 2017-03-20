@@ -1,8 +1,6 @@
 import requests, nltk
 
 def get_bigrams_and_vocabulary(_file):
-    """ Returns the bigrams and the vocabulary of all the article titles found 
-    in the _file. Each article title is expected to be a valid entry in wikipedia"""
     titles = _read_titles_from(_file)
     return _get_bigrams_and_vocabulary_forall(titles)
 
