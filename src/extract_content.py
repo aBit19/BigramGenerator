@@ -1,39 +1,21 @@
 import requests, nltk
 
-#TODO: Create appropriate input files for HMM,
-#using transition prob and vocabulary.
-def generate_transition_prob_from(_file):
-    """The _file contains set of wikipedia articles which the transition
-    probabilities is to be derived from.
-    Returns a map having bigram (word1, word2) as key and as value the
-    transition probability from word1 to word2."""
+#Let the client to write the internals, to the file he wants. 
+
+def create_vocabulary_and_digram_files_from(_file):
+    """Return (transition_probabilities, vocabulary) lists ready to be
+    written in the file, with the correct format."""
+    tranp, vocab = _generate_transition_prob_and_vocab_from(_file)
+    word2idx = _get_word2idx_from(vocab)
+    final_tranp = _get_tranp_to_be_written(tranp, word2idx)
+    return ([_makeit(line) for line in final_tranp], [str(idx) +' '+ word for idx, word in enumerate(vocab)])
+
+def _generate_transition_prob_and_vocab_from(_file):
     bigrams, vocabulary = _get_bigrams_and_vocabulary(_file)
     source_dict = _calculate_sources_distribution_from(bigrams)
     transition_prob = _calculate_transition_prob_from(bigrams, source_dict)
-    return transition_prob
+    return (transition_prob, sorted(vocabulary))
     
-
-def _calculate_sources_distribution_from(bigrams):
-    tmp = {}
-    for bigram in bigrams:
-        source = bigram[0]
-        if (tmp.has_key(source)):
-            tmp[source] = tmp[source] + 1
-        else:
-            tmp[source] = 1
-
-    return tmp
-
-def _calculate_transition_prob_from(bigrams, source_dict):
-    tuple_dict = nltk.FreqDist(bigrams)
-    transition_prob = {} 
-    for bigram in bigrams:
-        prob = float(tuple_dict[bigram])/source_dict[bigram[0]]
-        transition_prob[bigram] = prob 
-    
-    return transition_prob 
-
-
 def _get_bigrams_and_vocabulary(_file):
     titles = _read_titles_from(_file)
     return _get_bigrams_and_vocabulary_forall(titles)
@@ -92,3 +74,42 @@ def _get_content_for(x):
 def _print(x):
         for key in x:
             print "from {} to {} with likelihood {}".format(key[0], key[1], x[key])
+
+def _calculate_sources_distribution_from(bigrams):
+    tmp = {}
+    for bigram in bigrams:
+        source = bigram[0]
+        if (tmp.has_key(source)):
+            tmp[source] = tmp[source] + 1
+        else:
+            tmp[source] = 1
+
+    return tmp
+
+def _calculate_transition_prob_from(bigrams, source_dict):
+    tuple_dict = nltk.FreqDist(bigrams)
+    transition_prob = {} 
+    for bigram in bigrams:
+        prob = float(tuple_dict[bigram])/source_dict[bigram[0]]
+        transition_prob[bigram] = prob 
+    
+    return transition_prob 
+
+def _get_tranp_to_be_written(tranp, word2idx):
+    to_write_dic = {}
+    for bigram in tranp:
+        to_write_dic[_get_indexes_for_bigram_elements(bigram, word2idx)] = tranp[bigram] 
+    return sorted(to_write_dic.items())
+
+def _get_word2idx_from(vocab):
+    word2idx = {}
+    for idx, word in enumerate(vocab):
+        word2idx[word] = idx
+    return word2idx
+
+def _get_indexes_for_bigram_elements(bigram, word2idx):
+    return (word2idx[bigram[0]], word2idx[bigram[1]])
+
+def _makeit(item):
+    return str(item[0][0]) + ' ' + str(item[0][1]) + ' ' + str(item[1]) 
+
