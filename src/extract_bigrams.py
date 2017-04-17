@@ -1,5 +1,5 @@
 #   1) open the file or just pass the name of count2w.txt
-#       fi = open("count2w.txt", "r")
+#       fi = open("../count2w.txt", "r")
 #   2) import math for the log10
 #   3) and call write_vocabulary_and_transition_prob(fi, math.log10)
 #   Results: Creates two files:
